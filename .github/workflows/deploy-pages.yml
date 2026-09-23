@@ -1,0 +1,78 @@
+name: Build and deploy landing
+
+on:
+  push:
+    branches: [main, feat/landing-v1]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: read
+    env:
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Validate public build configuration
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const url = new URL(process.env.VITE_SUPABASE_URL);
+          if (url.protocol !== 'https:' || url.username || url.password ||
+              !process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.startsWith('sb_publishable_')) {
+            throw new Error('Configure the two public Supabase repository variables before deployment.');
+          }
+          NODE
+      - run: npm ci
+      - run: npm run check
+      - name: Check static routes and media
+        shell: bash
+        run: |
+          test -s dist/index.html
+          test -s dist/privacy/index.html
+          test -s dist/assets/machonce-logo.png
+          test -s dist/assets/machonce-intro.mp4
+          test -s dist/assets/machonce-intro-poster.png
+          test ! -e dist/.env.local
+          test ! -e dist/.qa
+      - name: Configure Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+      - name: Upload production output
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

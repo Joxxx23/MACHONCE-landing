@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Short games. Global score. One chance. MACHONCE. Coming soon." />
+    <link rel="icon" href="data:," />
+    <script>
+      // Show the first video frame immediately; recover if the module never loads.
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('intro-pending');
+        window.setTimeout(() => document.documentElement.classList.remove('intro-pending'), 6000);
+      }
+    </script>
+    <link rel="preload" as="image" href="/assets/machonce-intro-poster.png" media="(prefers-reduced-motion: no-preference)" fetchpriority="high" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <title>MACHONCE — Coming soon</title>
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <main class="landing">
+      <section class="hero" aria-labelledby="brand-name">
+        <h1 id="brand-name" class="visually-hidden">MACHONCE</h1>
+        <div class="brand" data-state="static">
+          <img
+            class="brand__logo"
+            src="/assets/machonce-logo.png"
+            alt="MACHONCE"
+            width="2172"
+            height="718"
+            fetchpriority="high"
+          />
+          <video
+            class="brand__intro"
+            data-src="/assets/machonce-intro.mp4"
+            poster="/assets/machonce-intro-poster.png"
+            width="2172"
+            height="718"
+            preload="none"
+            muted
+            playsinline
+            disablepictureinpicture
+            disableremoteplayback
+            aria-hidden="true"
+            tabindex="-1"
+          ></video>
+        </div>
+
+        <p class="slogan"><span>Short games.</span> <span>Global score.</span> <span>One chance.</span></p>
+        <p class="coming-soon">CLOSED ALPHA COMING SOON</p>
+
+        <form class="waitlist" novalidate aria-label="Get early access" method="post">
+          <div class="waitlist__controls">
+            <label class="visually-hidden" for="email">Email address</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              autocomplete="email"
+              inputmode="email"
+              autocapitalize="none"
+              spellcheck="false"
+              maxlength="254"
+              pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+              aria-describedby="waitlist-hint waitlist-message"
+              required
+            />
+            <button type="submit" disabled>GET EARLY ACCESS</button>
+          </div>
+          <div class="waitlist__consent">
+            <input id="consent" name="consent" type="checkbox" autocomplete="off" aria-describedby="waitlist-message" required />
+            <div>
+              <label for="consent">I’m 16+ and want MACHONCE early-access, closed-alpha and launch emails. I can unsubscribe anytime.</label>
+            </div>
+          </div>
+          <p id="waitlist-hint" class="waitlist__hint">Be the first to play.</p>
+          <p id="waitlist-message" class="waitlist__message" role="status" aria-live="polite" aria-atomic="true"></p>
+          <noscript><p class="waitlist__message">Please enable JavaScript to use the early access form.</p></noscript>
+        </form>
+      </section>
+    </main>
+    <footer class="site-footer"><a href="/privacy">Privacy</a></footer>
+  </body>
+</html>
