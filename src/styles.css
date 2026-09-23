@@ -36,7 +36,7 @@ button, input { font: inherit; }
 }
 
 /* Both originals share a canvas. Only empty vertical space is hidden by CSS. */
-.brand__logo, .brand__intro {
+.brand__logo, .brand__intro, .brand__poster {
   position: absolute;
   top: 50%;
   left: 0;
@@ -48,6 +48,8 @@ button, input { font: inherit; }
 }
 
 .brand__logo { opacity: 1; }
+
+.brand__poster { display: none; }
 
 .brand__intro {
   pointer-events: none;
@@ -228,7 +230,21 @@ html.intro-pending .brand__intro,
   .site-footer { font-size: 0.875rem; }
   .landing { padding-block: 3rem; }
   .brand { aspect-ratio: 2172 / 620; }
+  .brand__logo { z-index: 0; }
+  .brand__intro { z-index: 1; }
+  .brand__poster {
+    display: block;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    background: #000;
+  }
+  html.intro-pending .brand__poster,
+  .brand[data-state="waiting"] .brand__poster,
+  .brand[data-state="playing"]:not([data-frame="ready"]) .brand__poster { opacity: 1; }
+  .brand[data-state="playing"][data-frame="ready"] .brand__poster { transition: opacity 120ms linear; }
   .slogan { max-width: 22rem; margin-inline: auto; line-height: 1.65; }
+  .coming-soon span { display: block; white-space: nowrap; }
   .waitlist { max-width: 25rem; }
   .waitlist__controls { flex-direction: column; gap: 0.75rem; }
   .waitlist input[type="email"], .waitlist button { min-height: 3.625rem; border-radius: 0.625rem; }
@@ -242,4 +258,5 @@ html.intro-pending .brand__intro,
   *, *::before, *::after { transition: none !important; }
   html .brand .brand__logo { opacity: 1; }
   .brand .brand__intro { display: none; }
+  .brand .brand__poster { display: none; }
 }

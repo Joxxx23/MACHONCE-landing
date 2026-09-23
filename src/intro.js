@@ -3,6 +3,8 @@ export function startIntro(brand, video) {
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   if (motion.matches || !video.dataset.src) return;
 
+  const mobile = window.matchMedia('(max-width: 600px)').matches;
+
   const logo = brand.querySelector('.brand__logo');
   const logoReady = logo instanceof HTMLImageElement
     ? logo.decode().catch(() => {})
@@ -10,6 +12,18 @@ export function startIntro(brand, video) {
   let finished = false;
   let startTimer = 0;
   let fallbackTimer = 0;
+  /** @type {number | null} */
+  let frameCallbackId = null;
+
+  function showMobileFrame() {
+    if (finished || !mobile) return;
+    video.removeEventListener('timeupdate', showMobileFrameAfterTimeUpdate);
+    brand.dataset.frame = 'ready';
+  }
+
+  function showMobileFrameAfterTimeUpdate() {
+    if (video.currentTime > 0 && video.readyState >= 2) showMobileFrame();
+  }
 
   async function showLogo() {
     if (finished) return;
@@ -17,6 +31,8 @@ export function startIntro(brand, video) {
     window.clearTimeout(startTimer);
     window.clearTimeout(fallbackTimer);
     motion.removeEventListener('change', onMotionChange);
+    video.removeEventListener('timeupdate', showMobileFrameAfterTimeUpdate);
+    if (frameCallbackId !== null) video.cancelVideoFrameCallback?.(frameCallbackId);
     video.pause();
     // Decode the PNG before uncovering it, so the compositor always has an image.
     await logoReady;
@@ -51,6 +67,16 @@ export function startIntro(brand, video) {
       return;
     }
     brand.dataset.state = 'playing';
+    if (!mobile || frameCallbackId !== null || brand.dataset.frame === 'ready') return;
+
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      // Safari can briefly clear the video poster when playback starts.
+      // Keep the separate image above it until a frame reaches the compositor.
+      frameCallbackId = video.requestVideoFrameCallback(showMobileFrame);
+    } else {
+      // Older browsers: wait for playback progress before exposing the video.
+      video.addEventListener('timeupdate', showMobileFrameAfterTimeUpdate);
+    }
   });
 
   brand.dataset.state = 'waiting';
